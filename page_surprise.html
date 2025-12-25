@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CADEAU</title>
+<link rel="icon" href="elements/photos/fond_animes/pere_noel.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    background-color: #013220; /* vert sapin */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Mountains of Christmas', cursive;
+
+    cursor: url("elements/photos/curseurs/cursor_noel.cur") 0 0, auto;
+  }
+
+  /* bouton image */
+  .start-image {
+    transition: transform 0.3s ease;
+    max-width: 300px;
+  }
+
+  .start-image:hover {
+    transform: scale(1.1);
+  }
+
+  /* curseur personnalisé */
+  .cursor-start {
+    cursor: url("elements/photos/curseurs/cursor_reine.cur") 0 0, pointer;
+  }
+  .footer {
+  position: fixed;      /* toujours visible */
+  bottom: 0;            /* collé en bas */
+  width: 100%;          /* prend toute la largeur */
+  text-align: center;   /* centré */
+  background-color: #013220; /* même couleur que le fond */
+  color: white;           /* couleur du texte */
+  font-family: 'Mountains of Christmas', cursive;
+  font-size: 20px;
+  padding: 10px 0;
+  z-index: 1000;        /* devant tout le reste */
+  font-family: Calibri, sans-serif;
+}
+</style>
+</head>
+<body>
+  
+  <a href="elements/page1.html" class="start-image cursor-start">
+    <img src="elements/photos/fond_animes/pere_noel.png" alt="Démarrer le karaoké" class="start-image">
+  </a>
+
+  <!-- Ajoute ceci juste avant la fermeture de </body> -->
+  <footer class="footer">
+    <p>idées : Raphaëlle, code : Miaou !</p>
+  </footer>
+
+</body>
+
+
+</html>

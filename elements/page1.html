@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>KARAOKE</title>
+<link rel="icon" href="photos/fond_animes/pere_noel.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+  background-color: #013220; /* vert sapin */
+  color: red;
+  /* font-family: Arial, sans-serif; */
+  font-family: 'Mountains of Christmas', cursive;
+  font-size: 26px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  cursor: url("photos/curseurs/cursor_noel.cur") 0 0, auto;
+  }
+
+  .cursor-start {
+    cursor: url("photos/curseurs/cursor_churros.cur") 0 0, pointer;
+  }
+
+  .cursor-play {
+      cursor: url("photos/curseurs/cursor_penguin.cur") 0 0, pointer;
+  }
+
+  h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  }
+  
+  #lyrics {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  }
+  
+  .controls {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px; /* ESPACE ENTRE LES DEUX IMAGES */
+  }
+  
+  .controls img {
+  transition: transform 0.2s ease;
+  }
+
+  .controls img:hover {
+    transform: scale(1.1);
+  }
+
+  .line {
+    margin: 6px 0;
+  }
+  .active {
+    color: white;
+    background-color: red;
+    font-weight: bold;
+  }
+  .past {
+    color: gray;
+  }
+  button {
+    font-size: 20px;
+    padding: 10px 20px;
+    margin-top: 20px;
+    margin-right: 10px;
+  }
+
+  .falling-icon {
+  position: fixed;
+  top: -50px;
+  width: 32px;
+  height: 32px;
+  pointer-events: none; /* ne gêne pas les clics */
+  animation: fall linear forwards;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+@keyframes fallDriftRotate {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(var(--drift), 55vh) rotate(180deg);
+  }
+  100% {
+    transform: translate(calc(var(--drift) * -1), 110vh) rotate(360deg);
+  }
+}
+
+.falling-icon {
+  position: fixed;
+  top: -60px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.9;
+  animation-name: fallDriftRotate;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.footer {
+  position: fixed;      /* toujours visible */
+  bottom: 0;            /* collé en bas */
+  width: 100%;          /* prend toute la largeur */
+  text-align: center;   /* centré */
+  background-color: #013220; /* même couleur que le fond */
+  color: white;           /* couleur du texte */
+  font-family: 'Mountains of Christmas', cursive;
+  font-size: 15px;
+  padding: 10px 0;
+  z-index: 1000;        /* devant tout le reste */
+  font-family: Calibri, sans-serif;
+}
+
+/* Curseur personnalisé pour ce bouton */
+.cursor-home {
+    cursor: pointer; /* valeur par défaut, remplacée par JS */
+  }
+  
+
+.home-button {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 8px 15px;
+  font-size: 18px;
+  color: red;
+  background-color: #013220; /* même couleur que le fond */
+  border: 2px solid red;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: 'Mountains of Christmas', cursive;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.home-button:hover {
+  transform: scale(1.1);
+  background-color: darkgreen;
+  color: white;
+}
+
+
+</style>
+</head>
+<body>
+<!-- Bouton retour avant le titre -->
+<a href="../page_surprise.html" class="cursor-home">🏠</a>
+
+<h1>🎄 Karaoké d'une chanson surprise 🎄</h1>
+
+<audio id="audio" src="divin_enfant.mp3"></audio>
+
+<div id="lyrics"></div>
+
+<div class="controls">
+  <img id="startBtn" class="cursor-start" src="photos/boutons/start.png" alt="Démarrer" style="width:100px; margin-right:20px;">
+  <img id="playPauseBtn" class="cursor-play" src="photos/boutons/play.png" alt="Play/Pause" style="width:50px; display:none;">
+</div>
+
+
+
+<script>
+  let snowInterval = null;
+// Ton tableau de paroles et timestamps
+const lyrics = [
+{start: 0.0, text: "Tu as reconnu ? "},
+{start: 5.0, text: ""},
+{start: 10.0, text: "Prête ? "},
+{start: 20.0, text: ""},
+
+{start: 24.0, text: "Il est né le divin enfant, "},
+{start: 29.0, text: "Jouez hautbois, résonnez musettes ! "},
+{start: 33.2, text: "Il est né le divin enfant, "},
+{start: 38.2, text: "Chantons tous son avènement ! "},
+
+{start: 42.5, text: "Depuis plus de quatre mille ans, "},
+{start: 47.3, text: "Nous le promettaient les prophètes "},
+{start: 52.2, text: "Depuis plus de quatre mille ans, "},
+{start: 57.0, text: "Nous attendions cet heureux temps. "},
+
+{start: 62.0, text: "Il est né le divin enfant, "},
+{start: 67.0, text: "Jouez hautbois, résonnez musettes ! "},
+{start: 71.2, text: "Il est né le divin enfant, "},
+{start: 76.2, text: "Chantons tous son avènement ! "},
+
+{start: 81.1, text: "Ah ! Qu'il est beau, qu'il est charmant ! "},
+{start: 86.0, text: "Ah ! que ses grâces sont parfaites ! "},
+{start: 91.0, text: "Ah ! Qu'il est beau, qu'il est charmant ! "},
+{start: 96.5, text: "Qu'il est doux ce divin enfant ! "},
+
+{start: 100.2, text: "Il est né le divin enfant, "},
+{start: 105.2, text: "Jouez hautbois, résonnez musettes ! "},
+{start: 109.2, text: "Il est né le divin enfant, "},
+{start: 114.4, text: "Chantons tous son avènement ! "},
+
+{start: 119.3, text: "Une étable est son logement"},
+{start: 124.1, text: "Un peu de paille est sa couchette,"},
+{start: 129.0, text: "Une étable est son logement"},
+{start: 134.0, text: "Pour un dieu quel abaissement ! "},
+
+{start: 138.3, text: "Il est né le divin enfant, "},
+{start: 143.3, text: "Jouez hautbois, résonnez musettes ! "},
+{start: 147.3, text: "Il est né le divin enfant, "},
+{start: 152.4, text: "Chantons tous son avènement ! "},
+
+{start: 158.0, text: "O Jésus ! O Roi tout-puissant"},
+{start: 162.3, text: "Tout petit enfant que vous êtes,"},
+{start: 167.2, text: "O Jésus ! O Roi tout-puissant,"},
+{start: 172.0, text: "Régnez sur nous entièrement ! "},
+
+{start: 2*60+58, text: ""},
+
+{start: 3*60+2, text: "Il est né le divin enfant, "},
+{start: 3*60+7, text: "Jouez hautbois, résonnez musettes ! "},
+{start: 3*60+11, text: "Il est né le divin enfant, "},
+{start: 3*60+15, text: "Chantons tous son avènement ! "},
+
+{start: 3*60+22, text: ""},
+
+{start: 3*60+25, text: "Chantons tous son avènement ! "},
+
+{start: 3*60+33, text: ""},
+
+{start: 3*60+40, text: "Il est né le divin enfant, "},
+
+{start: 3*60+44, text: ""},
+];
+
+// Crée les divs pour chaque ligne
+const lyricsDiv = document.getElementById("lyrics");
+lyrics.forEach(l => {
+  const div = document.createElement("div");
+  div.className = "line";
+  div.textContent = "";
+  lyricsDiv.appendChild(div);
+  l.element = div;
+});
+
+const startBtn = document.getElementById("startBtn");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const audio = document.getElementById("audio");
+let animationRunning = false;
+
+function update() {
+  const currentTime = audio.currentTime;
+  lyrics.forEach((l, i) => {
+    const nextStart = lyrics[i+1] ? lyrics[i+1].start : audio.duration;
+    if(currentTime >= l.start && currentTime < nextStart) {
+      const ratio = (currentTime - l.start) / (nextStart - l.start);
+      const n = Math.floor(l.text.length * ratio);
+      l.element.textContent = l.text.slice(0, n);
+      l.element.className = "line active";
+    } else if(currentTime >= nextStart) {
+      l.element.textContent = l.text;
+      l.element.className = "line past";
+    } else {
+      l.element.textContent = "";
+      l.element.className = "line";
+    }
+  });
+  if(animationRunning) requestAnimationFrame(update);
+}
+
+
+// ▶️ DÉMARRER / RECOMMENCER
+startBtn.addEventListener("click", () => {
+  audio.currentTime = 0;
+  audio.play();
+  animationRunning = true;
+  requestAnimationFrame(update);
+
+  // Changer Start → Reset
+  startBtn.src = "photos/boutons/reset.png";
+  startBtn.alt = "Reset";
+  startBtn.style.width = "45px";     // nouvelle largeur
+  startBtn.style.height = "45px";    // nouvelle hauteur
+
+  // Afficher Play/Pause
+  playPauseBtn.style.display = "inline-block";
+  playPauseBtn.src = "photos/boutons/pause.png"; // bouton devient pause quand la chanson démarre
+  // démarrer les flocons au start (une seule fois)
+if (!snowInterval) {
+  snowInterval = setInterval(createFallingIcon, 150);
+}
+
+});
+
+// ▶️ / ⏸️ PLAY ↔ PAUSE
+playPauseBtn.addEventListener("click", () => {
+  if (audio.paused) {
+    audio.play();
+    playPauseBtn.src = "photos/boutons/pause.png";
+    animationRunning = true;
+    requestAnimationFrame(update);
+  } else {
+    audio.pause();
+    playPauseBtn.src = "photos/boutons/play.png";
+    animationRunning = false;
+  }
+});
+
+// Quand la musique se termine → retour à ▶
+audio.addEventListener("ended", () => {
+  playPauseBtn.src = "photos/boutons/play.png";
+  animationRunning = false;
+});
+
+
+fallingImages = [
+// Très rares
+{ src: "photos/fond_animes/pokemon.png", weight: 1.0 },
+{ src: "photos/fond_animes/philou1.png", weight: 1.0 },
+{ src: "photos/fond_animes/philou2.png", weight: 1.0 },
+
+// Rare
+{ src: "photos/fond_animes/pere_noel.png", weight: 1.0 },
+
+// Groupes répartis
+{ src: "photos/fond_animes/deco1.png", weight: 1.05 },
+{ src: "photos/fond_animes/deco2.png", weight: 1.15 },
+{ src: "photos/fond_animes/deco3.png", weight: 1.09 },
+{ src: "photos/fond_animes/deco4.png", weight: 1.12 },
+{ src: "photos/fond_animes/houx.png", weight: 1.08 },
+
+{ src: "photos/fond_animes/ball.png", weight: 1.25 },
+{ src: "photos/fond_animes/ball1.png", weight: 1.32 },
+{ src: "photos/fond_animes/boule.png", weight: 1.40 },
+{ src: "photos/fond_animes/boule_star.png", weight: 1.46 },
+{ src: "photos/fond_animes/bauble.png", weight: 1.30 },
+
+{ src: "photos/fond_animes/cadeau_rouge.png", weight: 1.50 },
+{ src: "photos/fond_animes/cadeau_vert.png", weight: 1.60 },
+{ src: "photos/fond_animes/reine_cadeau.png", weight: 1.70 },
+
+{ src: "photos/fond_animes/pain_epice1.png", weight: 1.75 },
+{ src: "photos/fond_animes/pain_epice2.png", weight: 1.75 },
+{ src: "photos/fond_animes/gingerbread.png", weight: 1.75 },
+
+{ src: "photos/fond_animes/chaussette.png", weight: 1.90 },
+{ src: "photos/fond_animes/chaussette_noel.png", weight: 1.95 },
+
+// Individuels normaux
+{ src: "photos/fond_animes/flocon.png", weight: 1.352 },
+{ src: "photos/fond_animes/sapin.png", weight: 1.413 },
+{ src: "photos/fond_animes/ange.png", weight: 1.436 },
+{ src: "photos/fond_animes/lettre_noel_sapin.png", weight: 1.236 },
+{ src: "photos/fond_animes/cloches.png", weight: 1.345 },
+{ src: "photos/fond_animes/globe.png", weight: 1.347 },
+{ src: "photos/fond_animes/couronne.png", weight: 1.329 }
+];
+
+
+function getRandomWeightedImage() {
+  const totalWeight = fallingImages.reduce((sum, img) => sum + img.weight, 0);
+  let rand = Math.random() * totalWeight;
+  for (const img of fallingImages) {
+    if (rand < img.weight) return img.src;
+    rand -= img.weight;
+  }
+}
+
+function createFallingIcon() {
+  const icon = document.createElement("img");
+
+  // image aléatoire selon le poids
+  const randomImage = getRandomWeightedImage();
+  icon.src = randomImage;
+
+  icon.className = "falling-icon";
+
+  // gauche ou droite
+const side = Math.random() < 0.5 ? "left" : "right";
+
+// largeur de bande (15% de l'écran)
+const bandWidth = window.innerWidth * 0.100;
+const offset = Math.random() * bandWidth + "px";
+
+if (side === "left") {
+  icon.style.left = offset;
+} else {
+  icon.style.right = offset;
+}
+
+
+  // taille aléatoire
+  const size = Math.random() * 20 + 40;
+  icon.style.width = size + "px";
+  icon.style.height = size + "px";
+
+  // durée aléatoire
+  const duration = Math.random() * 5 + 6;
+  icon.style.animationDuration = duration + "s";
+
+  // dérive aléatoire gauche/droite
+  const drift = (Math.random() * 60 + 20) * (Math.random() < 0.5 ? -1 : 1);
+  icon.style.setProperty("--drift", drift + "px");
+
+  document.body.appendChild(icon);
+
+  // suppression après animation
+  setTimeout(() => {
+    icon.remove();
+  }, duration * 1000);
+}
+
+const cursors = [
+"photos/curseurs/cursor_plusle.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_plusle.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_plusle.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_plusle.cur",
+"photos/curseurs/cursor_minun.cur",
+"photos/curseurs/cursor_minun.cur"
+];
+
+document.querySelectorAll(".cursor-home").forEach(el => {
+el.addEventListener("mouseenter", () => {
+  const randomCursor = cursors[Math.floor(Math.random() * cursors.length)];
+  el.style.cursor = `url("${randomCursor}") 0 0, pointer`;
+});
+});
+
+
+</script>
+
+<footer class="footer">
+    <p>idées : Raphaëlle, code : Miaou !</p>
+  </footer>
+
+</body>
